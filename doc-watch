@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+CONTENT_DIR="${CONTENT_DIR:-content}"
+STYLE_DIR="${STYLE_DIR:-styles}"
+PIPE="${PIPE:-./doc-pipe}"
+STYLE="${1:-markdown}"
+
+CONTENT_DIR="${CONTENT_DIR%/}"
+STYLE_DIR="${STYLE_DIR%/}"
+
+log() {
+  printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"
+}
+
+should_ignore() {
+  local path="$1"
+
+  case "$path" in
+    *~|*.swp|*.swx|*.tmp|*.part|*/.git/*|*/.cache/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+build_one() {
+  local src="$1"
+
+  [[ -f "$src" ]] || return 0
+  [[ "$src" == *.md ]] || return 0
+  should_ignore "$src" && return 0
+
+  log "building $src with style '$STYLE'"
+  if "$PIPE" "$src" "$STYLE"; then
+    log "ok: $src"
+  else
+    log "failed: $src"
+  fi
+}
+
+build_all() {
+  log "building all Markdown files with style '$STYLE'"
+
+  while IFS= read -r -d '' src; do
+    build_one "$src"
+  done < <(find "$CONTENT_DIR" -type f -name '*.md' -print0)
+}
+
+if ! command -v inotifywait >/dev/null 2>&1; then
+  echo "Missing dependency: inotifywait"
+  echo "Install it with: sudo dnf install inotify-tools"
+  exit 1
+fi
+
+if [[ ! -x "$PIPE" ]]; then
+  echo "Cannot execute pipeline: $PIPE"
+  echo "Set PIPE=/path/to/doc-pipe or make ./doc-pipe executable."
+  exit 1
+fi
+
+mkdir -p build
+
+build_all
+
+log "watching $CONTENT_DIR/ and $STYLE_DIR/"
+log "style: $STYLE"
+log "press Ctrl+C to stop"
+
+inotifywait -m -r -q \
+  -e close_write,moved_to,create,delete \
+  --format '%w%f' \
+  "$CONTENT_DIR" "$STYLE_DIR" |
+while IFS= read -r changed_path; do
+  should_ignore "$changed_path" && continue
+
+  if [[ "$changed_path" == "$CONTENT_DIR/"* && "$changed_path" == *.md ]]; then
+    build_one "$changed_path"
+  elif [[ "$changed_path" == "$STYLE_DIR/"* && "$changed_path" == *.css ]]; then
+    log "style changed: $changed_path"
+    build_all
+  fi
+done

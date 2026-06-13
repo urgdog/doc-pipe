@@ -1,0 +1,192 @@
+@page {
+  size: letter;
+  margin: 0.55in;
+
+  @bottom-center {
+    content: counter(page);
+    font-size: 8pt;
+    color: #777;
+  }
+}
+
+html {
+  font-family: "JetBrains Mono", "Fira Code", "DejaVu Sans Mono", monospace;
+  font-size: 9.5pt;
+  line-height: 1.35;
+}
+
+body {
+  margin: 0;
+}
+
+/* Headings: preserve Markdown flavor, not Markdown size hierarchy */
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0.85em 0 0.35em;
+  font-weight: 800;
+  break-after: avoid;
+}
+
+h1::before { content: "# "; }
+h2::before { content: "## "; }
+h3::before { content: "### "; }
+h4::before { content: "#### "; }
+h5::before { content: "##### "; }
+h6::before { content: "###### "; }
+
+h1 {
+  color: #2f365f;
+}
+
+h2 {
+  color: #3f4a7a;
+}
+
+h3 {
+  color: #444;
+}
+
+/* Paragraphs */
+
+p {
+  margin: 0 0 0.65em 0;
+}
+
+/* Bold / italic: keep the source-ish markers */
+
+strong {
+  font-weight: 800;
+}
+
+strong::before,
+strong::after {
+  content: "**";
+  color: #777;
+  font-weight: 500;
+}
+
+em {
+  font-style: italic;
+}
+
+em::before,
+em::after {
+  content: "*";
+  color: #777;
+}
+
+/* Inline code: very useful for technical resumes */
+
+code {
+  font-family: inherit;
+  background: #eeeeee;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  padding: 0 0.15em;
+}
+
+code::before,
+code::after {
+  content: "`";
+  color: #777;
+}
+
+/* Links: Markdown-ish, but do not expose the full URL */
+
+a {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+a::before {
+  content: "[";
+  color: #777;
+  font-weight: 500;
+}
+
+a::after {
+  content: "] ↗";
+  color: #777;
+  font-weight: 500;
+}
+
+/* Lists: keep bullets source-like */
+
+ul {
+  list-style: none;
+  padding-left: 2ch;
+  margin: 0 0 0.65em 0;
+}
+
+ul li::before {
+  content: "- ";
+  color: #777;
+}
+
+ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 2ch;
+  margin: 0 0 0.65em 0;
+}
+
+ol li {
+  counter-increment: item;
+}
+
+ol li::before {
+  content: counter(item) ". ";
+  color: #777;
+}
+
+li {
+  margin-bottom: 0.18em;
+  break-inside: avoid;
+}
+
+/* Blockquotes: readable, still Markdown-flavored */
+
+blockquote {
+  margin: 0 0 0.65em 0;
+  padding-left: 0;
+  border-left: none;
+  font-style: italic;
+}
+
+blockquote p::before {
+  content: "> ";
+  color: #777;
+}
+
+/* Horizontal rule */
+
+hr {
+  border: none;
+  margin: 0.65em 0;
+}
+
+hr::before {
+  content: "---";
+  color: #777;
+}
+
+/* Tables: do NOT try too hard to make these look raw Markdown */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.6em 0;
+}
+
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 0.25em 0.4em;
+  text-align: left;
+}
+
+th {
+  font-weight: 800;
+}

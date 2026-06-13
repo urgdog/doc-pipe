@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+INPUT="${1:?usage: mdpdf input.md style-name [output.pdf]}"
+STYLE="${2:?usage: mdpdf input.md style-name [output.pdf]}"
+OUTPUT="${3:-build/$(basename "$INPUT" .md)-$STYLE.pdf}"
+
+mkdir -p build
+
+pandoc "$INPUT" \
+  --from markdown \
+  --to html5 \
+  --standalone \
+  --css "styles/$STYLE.css" \
+  --pdf-engine=weasyprint \
+  --output "$OUTPUT"
+
+echo "wrote $OUTPUT"
